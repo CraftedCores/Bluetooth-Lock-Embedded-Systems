@@ -1,3 +1,4 @@
+/* Chandler Johnson: Example to control a relay or other output using serial commands*/
 
 String command;
 
