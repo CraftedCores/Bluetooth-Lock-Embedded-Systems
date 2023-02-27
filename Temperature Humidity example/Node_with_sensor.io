@@ -20,6 +20,7 @@ DHT dht(DHTPIN, DHTTYPE);
 
 //Number for this node
 int nodeNumber = 2;
+int ledState = 0;
 
 //String to send to other nodes with sensor readings
 String readings;
@@ -37,7 +38,6 @@ Task taskSendMessage(TASK_SECOND * 5 , TASK_FOREVER, &sendMessage);
 String getReadings () {
   JSONVar jsonReadings;
   jsonReadings["node"] = nodeNumber;
-  jsonReadings["LED"] = 1;
   jsonReadings["TEMP"] = checkTemp();
   jsonReadings["HUMIDITY"] = checkHum();
   readings = JSON.stringify(jsonReadings);
@@ -55,13 +55,16 @@ void receivedCallback( uint32_t from, String &msg ) {
   Serial.printf("Received from %u msg=%s\n", from, msg.c_str());
   JSONVar myObject = JSON.parse(msg.c_str());
   int node = myObject["node"];
-  int ledState = myObject["LED"];
 
-  if(ledState == 1){
+  if(ledState == 0){
     LedOn();
-    delay(500);
-    LedOff();
+    ledState = 1;
   }
+  else if(ledState == 1){
+    LedOff();
+    ledState = 0;
+  }
+  
 }
 
 void LedOn() {
