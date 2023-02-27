@@ -1,6 +1,6 @@
 /*
   Chandler Johnson:
-  This example can bu uploaded to all the boards you want to test, just
+  This example can be uploaded to all the boards you want to test, just
   make sure to update the node number for each board. This example creates a 
   mesh network and sends the node number in a JSON file. When a message is 
   detected as recieved the JSON file is unpackaged and displayed to Serial.
