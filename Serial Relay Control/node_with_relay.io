@@ -1,12 +1,7 @@
 /*
-  Rui Santos
-  Complete project details at https://RandomNerdTutorials.com/esp-mesh-esp32-esp8266-painlessmesh/
-  
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files.
-  
-  The above copyright notice and this permission notice shall be included in all
-  copies or substantial portions of the Software.
+  Chandler Johnson:
+  This code is for the node with the relay connected to it, 
+  It waits for the ON signal from the hub node.
 */
 
 #include "painlessMesh.h"
@@ -18,11 +13,8 @@
 #define   MESH_PORT       5555 //default port
 
 //Number for this node
-int nodeNumber = 1;
-const int DOOR_SENSOR_PIN = 23; // Arduino pin connected to door sensor's pin
-int doorState;
-
-String command;
+int nodeNumber = 2;
+int ledState = 0;
 
 //String to send to other nodes with sensor readings
 String readings;
@@ -31,22 +23,16 @@ Scheduler userScheduler; // to control your personal task
 painlessMesh  mesh;
 
 // User stub
-void sendMessage() ; // Prototype so PlatformIO doesn't complain
+void sendMessage(); // Prototype so PlatformIO doesn't complain
 String getReadings(); // Prototype for sending sensor readings
 
 //Create tasks: to send messages and get readings;
 Task taskSendMessage(TASK_SECOND * 5 , TASK_FOREVER, &sendMessage);
 
-String getReadings () {
-
-  //doorState = digitalRead(DOOR_SENSOR_PIN); // read state
+String getReadings() {
 
   JSONVar jsonReadings;
   jsonReadings["node"] = nodeNumber;
-  jsonReadings["LED"] = 1;
-  //jsonReadings["door"] = doorState;
-  jsonReadings["trigger"] = command;
-
 
   readings = JSON.stringify(jsonReadings);
   return readings;
@@ -60,17 +46,27 @@ void sendMessage () {
 
 // Needed for painless library
 void receivedCallback( uint32_t from, String &msg ) {
-  //Serial.printf("Received from %u msg=%s\n", from, msg.c_str());
+  Serial.printf("Received from %u msg=%s\n", from, msg.c_str());
   JSONVar myObject = JSON.parse(msg.c_str());
   int node = myObject["node"];
-  int ledState = myObject["LED"];
-  int doorState = myObject["door"];
+  String trigger = myObject["trigger"];
 
-  if(ledState == 1){
+  if(ledState == 0){
     LedOn();
-    delay(500);
-    LedOff();
+    ledState = 1;
   }
+  else if(ledState == 1){
+    LedOff();
+    ledState = 0;
+  }
+
+  if(trigger == "ON"){
+    relayOn();
+  }
+  else if(trigger == "OFF"){
+    relayOff();
+  }
+
 }
 
 void LedOn() {
@@ -81,10 +77,12 @@ void LedOff() {
   digitalWrite(2, LOW);
 }
 
-void serialControl(){
-    if(Serial.available()){
-    command = Serial.readStringUntil('\n');
-  }  
+void relayOn() {
+  digitalWrite(23, HIGH);
+}
+
+void relayOff() {
+  digitalWrite(23, LOW);
 }
 
 void newConnectionCallback(uint32_t nodeId) {
@@ -101,8 +99,13 @@ void nodeTimeAdjustedCallback(int32_t offset) {
 
 void setup() {
   Serial.begin(115200);
-  pinMode (2, OUTPUT);
-  pinMode(DOOR_SENSOR_PIN, INPUT_PULLUP);
+
+  // on board LED
+  pinMode(2, OUTPUT);
+  
+  // Relay Trigger pin
+  pinMode(23, OUTPUT);
+
 
   //mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
   mesh.setDebugMsgTypes( ERROR | STARTUP );  // set before init() so that you can see startup messages
@@ -120,7 +123,5 @@ void setup() {
 void loop() {
   // it will run the user scheduler as well
   mesh.update();
-  serialControl();
-
 
 }
