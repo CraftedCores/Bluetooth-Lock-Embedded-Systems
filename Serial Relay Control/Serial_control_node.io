@@ -50,7 +50,7 @@ void sendMessage () {
 
 // Needed for painless library
 void receivedCallback( uint32_t from, String &msg ) {
-  //Serial.printf("Received from %u msg=%s\n", from, msg.c_str());
+  Serial.printf("Received from %u msg=%s\n", from, msg.c_str());
   JSONVar myObject = JSON.parse(msg.c_str());
   int node = myObject["node"];
 
