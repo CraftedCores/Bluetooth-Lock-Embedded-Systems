@@ -1,12 +1,12 @@
 /*
-  Rui Santos
-  Complete project details at https://RandomNerdTutorials.com/esp-mesh-esp32-esp8266-painlessmesh/
-  
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files.
-  
-  The above copyright notice and this permission notice shall be included in all
-  copies or substantial portions of the Software.
+  Chandler Johnson:
+  This example can bu uploaded to all the boards you want to test, just
+  make sure to update the node number for each board. This example creates a 
+  mesh network and sends the node number in a JSON file. When a message is 
+  detected as recieved the JSON file is unpackaged and displayed to Serial.
+  The blink example will toggle the ledState everytime a message is received.
+  If the boards are working correctly you'll see the On board LED toggle
+  on and off everytime a message is received.
 */
 
 #include "painlessMesh.h"
@@ -19,6 +19,7 @@
 
 //Number for this node
 int nodeNumber = 1;
+int ledState = 0;
 
 //String to send to other nodes with sensor readings
 String readings;
@@ -36,7 +37,6 @@ Task taskSendMessage(TASK_SECOND * 5 , TASK_FOREVER, &sendMessage);
 String getReadings () {
   JSONVar jsonReadings;
   jsonReadings["node"] = nodeNumber;
-  jsonReadings["LED"] = 1;
   readings = JSON.stringify(jsonReadings);
   return readings;
 }
@@ -52,13 +52,18 @@ void receivedCallback( uint32_t from, String &msg ) {
   Serial.printf("Received from %u msg=%s\n", from, msg.c_str());
   JSONVar myObject = JSON.parse(msg.c_str());
   int node = myObject["node"];
-  int ledState = myObject["LED"];
 
-  if(ledState == 1){
+
+  if(ledState == 0){
     LedOn();
-    delay(500);
-    LedOff();
+    ledState = 1;
   }
+  else if(ledState == 1){
+    LedOff();
+    ledState = 0;
+  }
+
+  
 }
 
 void LedOn() {
