@@ -25,7 +25,7 @@ int ledState = 0;
 // Reed switch connection
 const int RELAY = 23;
 const int REED_PIN = 16;
-const int REED_LED = 14;
+const int REED_LED = 4;
 
 //String to send to other nodes with sensor readings
 String readings;
@@ -82,12 +82,13 @@ void receivedCallback( uint32_t from, String &msg ) {
     relayOff();
   }
 
-  if(door = 0){
+  if(door == 0){
     reedOff();
   }
   else{
     reedOn();
   }
+
 
 }
 
@@ -125,11 +126,11 @@ void LedOff() {
 }
 
 void relayOn() {
-  digitalWrite(23, HIGH);
+  digitalWrite(RELAY, HIGH);
 }
 
 void relayOff() {
-  digitalWrite(23, LOW);
+  digitalWrite(RELAY, LOW);
 }
 
 void newConnectionCallback(uint32_t nodeId) {
