@@ -25,7 +25,7 @@ int ledState = 0;
 // Reed switch connection
 const int RELAY = 23;
 const int REED_PIN = 16;
-const int REED_LED = 4;
+const int REED_LED = 14;
 
 //String to send to other nodes with sensor readings
 String readings;
