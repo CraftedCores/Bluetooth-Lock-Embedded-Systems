@@ -23,7 +23,8 @@ int nodeNumber = 2;
 int ledState = 0;
 
 // Reed switch connection
-const int REED_PIN = 23;
+const int RELAY = 23;
+const int REED_PIN = 16;
 const int REED_LED = 14;
 
 //String to send to other nodes with sensor readings
@@ -153,7 +154,7 @@ void setup() {
   pinMode(2, OUTPUT);
   
   // Relay Trigger pin
-  pinMode(23, OUTPUT);
+  pinMode(RELAY, OUTPUT);
 
   // Reed switch
   pinMode(REED_PIN, INPUT_PULLUP);
